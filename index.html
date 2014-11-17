@@ -1,0 +1,278 @@
+<html>
+    <head>
+        <title>Hangman Demo</title>
+    </head>
+    <body>
+        <input type="file" id="files" name="files[]" multiple />
+        <output id="list"></output>
+        <p id="fileContents"></p>
+        <button onclick="processVocab()">Process</button>
+        <table>
+          <tr>
+            <td>
+              words length 1<input id="length1" type="radio" name="length" value = "1" onclick="setVocabLength()">
+            </td>
+          </tr>
+          <tr>
+            <td>
+              words length 2<input id="length2" type="radio" name="length" value = "2" onclick="setVocabLength()">
+            </td>
+          </tr>
+          <tr>
+            <td>
+               words length 3<input id="length3" type="radio" name="length" value = "3" onclick="setVocabLength()">
+            </td>
+          </tr>
+          <tr>
+            <td>
+               words length 4<input id="length4" type="radio" name="length" value = "4" onclick="setVocabLength()">
+            </td>
+          </tr>
+          <tr>
+            <td>
+               words length 5<input id="length5" type="radio" name="length" value = "5" onclick="setVocabLength()">
+            </td>
+          </tr>
+        </table>
+
+        <button onClick="guess('A');">A</button>
+        <button onClick="guess('B');">B</button>
+        <button onClick="guess('C');">C</button>
+        <button onClick="guess('D');">D</button>
+        <button onClick="guess('E');">E</button>
+        <button onClick="guess('F');">F</button>
+        <button onClick="guess('G');">G</button>
+        <button onClick="guess('H');">H</button>
+        <button onClick="guess('I');">I</button>
+        <button onClick="guess('J');">J</button>
+        <button onClick="guess('K');">K</button>
+        <button onClick="guess('L');">L</button>
+        <button onClick="guess('M');">M</button>
+        <button onClick="guess('N');">N</button>
+        <button onClick="guess('O');">O</button>
+        <button onClick="guess('P');">P</button>
+        <button onClick="guess('Q');">Q</button>
+        <button onClick="guess('R');">R</button>
+        <button onClick="guess('S');">S</button>
+        <button onClick="guess('T');">T</button>
+        <button onClick="guess('U');">U</button>
+        <button onClick="guess('V');">V</button>
+        <button onClick="guess('W');">W</button>
+        <button onClick="guess('X');">X</button>
+        <button onClick="guess('Y');">Y</button>
+        <button onClick="guess('Z');">Z</button>
+        <!--this paragraph is for keeping track of word -->
+        <p id="guessing"></p>
+
+        <p id="progress"></p>
+
+        <p id="probability"></p>
+        <script>
+          //Global variable for keeping all the vocabs.
+          var vocab = [];
+          var char_frequency = [];
+          var word_length = 0;
+          //Variable to store all the words that have the length and should be something to guessed
+          var guess_pool = [];
+          //The word being guessed
+          var guessing_word;
+          //Tmp user interface for displaying the guessing progress
+          var tmp_result = "";
+
+          var correct_index = [];
+
+          function handleFileSelect(evt) {
+            var files = evt.target.files; // FileList object
+            // files is a FileList of File objects. List some properties.
+            var output = [];
+            for (var i = 0, f; f = files[i]; i++) {
+              output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                          f.size, ' bytes, last modified: ',
+                          f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                          '</li>');
+                var reader = new FileReader();
+                reader.onload = function(evt){
+                    var words = evt.target.result;
+                    vocab = words.split("\n");
+                }
+                // Read in the image file as a data URL.
+                reader.readAsText(f);
+            }
+            document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+          }
+          document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+          function processVocab(){
+            //Init char frequency list
+            for(var i = 0; i < 26; i++){
+                char_frequency[i] = 0;
+            }
+
+            for(var i = 0; i < vocab.length; i++){
+                var word = vocab[i];
+                for(var j = 0; j < word.length; j++){
+                    char_frequency[word.charCodeAt(j)-65] += 1; 
+                    //console.log(word.charCodeAt(j));
+               }
+            }
+            for(var i = 0; i < 26; i++){
+                console.log(String.fromCharCode(i + 65) + ": " +char_frequency[i]);
+            }
+
+            console.log(vocab);
+            vocab.sort(function(a, b){
+              return a.length - b.length; // ASC -> a - b; DESC -> b - a
+            });
+            console.log(vocab);
+          }
+          function setVocabLength(){
+
+            guess_pool = [];
+            if(document.getElementById('length1').checked){
+              console.log("length set to 1");
+              word_length = 1;
+            }
+            else if(document.getElementById('length2').checked){
+              console.log("length set to 2");
+              word_length = 2;
+
+            }
+            else if(document.getElementById('length3').checked){
+              console.log("length set to 3");
+              word_length = 3;
+
+            }
+            else if(document.getElementById('length4').checked){
+              console.log("length set to 4");
+              word_length = 4;
+            }
+            else if(document.getElementById('length5').checked){
+              console.log("length set to 5");
+              word_length = 5;
+            }
+            //If file read in happened
+            if(vocab.length != 0){
+              for(var i = 0; i < vocab.length; i++){
+                if(vocab[i].length == word_length){
+                  guess_pool.push(vocab[i]);
+                }
+              }
+              var index = Math.floor((Math.random() * guess_pool.length));
+
+              guessing_word = guess_pool[index];
+              console.log("the guess word pool is");
+              console.log(guess_pool);
+              console.log("the word is " + guessing_word);
+              tmp_result = "";
+              correct_index = [];
+              for(var i = 0; i < guessing_word.length; i++){
+                console.log(guessing_word.charAt(i));
+                tmp_result += "_ ";
+              }
+              document.getElementById("guessing").innerHTML = tmp_result + "<br/>";
+            }
+            else{
+              alert("need to read a vocab file");
+            }
+          }
+
+          /**
+           * Function called when the letter keyboard is pressed and one 
+           * letter is being guessed.
+           **/
+          function guess(letter){
+
+            if(word_length == 0){
+              alert("pick the word length");
+            }
+            else{
+              document.getElementById("progress").innerHTML += "guessing letter " + letter + "<br/>";
+            }
+            tmp_result = "";
+            console.log(letter);
+            var index = indexes(guessing_word, "" + letter);
+            console.log(index);
+            if(index.length > 0){
+              console.log("correct guessed");
+              for(var i = 0; i < index.length; i++){
+                correct_index.push(index[i]);
+              }
+              var tmp_index = 0;
+              correct_index = correct_index.filter(onlyUnique);
+              correct_index.sort();
+              console.log(correct_index);
+              console.log("length is " + guessing_word.length);
+              for(var i = 0; i < guessing_word.length; i++){
+                if(tmp_index >= correct_index.length){
+                  tmp_result += "_ ";
+                }
+                else{
+                  if(i == correct_index[tmp_index]){
+                    console.log("correct guessed letter " + letter + " at index " + i);
+                    tmp_result += "" + guessing_word.charAt(i) + " ";
+                    tmp_index++;
+                  }
+                  else{
+                    tmp_result += "_ ";
+                  }
+                }
+              }
+              document.getElementById("guessing").innerHTML = tmp_result + "<br/>";
+              if(correct_index.length == guessing_word.length){
+                document.getElementById("progress").innerHTML += "DONE!" + "<br/>";
+              }
+            }
+            else{
+              console.log("wrong");
+            }
+            document.getElementById("probability").innerHTML = "Best Guess: <br/>";
+            list_of_possible_guess = [];
+            for(var i = 0; i < guess_pool.length; i++){
+              var current_word = guess_pool[i];
+              var good = false;
+              for(var j = 0; j < correct_index.length; j++){
+                console.log(guessing_word.charAt(correct_index[j]));
+                console.log(current_word.charAt(correct_index[j]));
+                if(guessing_word.charAt(correct_index[j]) == current_word.charAt(correct_index[j])){
+                  console.log("here");
+                }
+                else{
+                  good = false;
+                  break;
+                }
+                good = true;
+              }
+              if(good){
+                console.log("pushing" + current_word);
+                list_of_possible_guess.push(current_word);
+              }
+            }
+            console.log("list of possible guess");
+            console.log(list_of_possible_guess);
+            for(var i = 0; i < list_of_possible_guess.length; i++){
+              document.getElementById("probability").innerHTML += list_of_possible_guess[i] + "<br/>";
+            }
+
+          }
+          /**
+           * Given a string and its find, return all indexs of its occurences
+           **/
+          function indexes(source, find) {
+            var result = [];
+            for(i=0;i<source.length; ++i) {
+            // If you want to search case insensitive use 
+            // if (source.substring(i, i + find.length).toLowerCase() == find) {
+              if (source.substring(i, i + find.length) == find) {
+                result.push(i);
+              }
+             }
+            return result;
+          }
+          function onlyUnique(value, index, self) { 
+            return self.indexOf(value) === index;
+          }
+
+
+        </script>
+    </body>
+</html>
