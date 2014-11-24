@@ -85,36 +85,39 @@
         <output id="list"></output>
 
         <p id="fileContents"></p>
-        <button onclick="processVocab()">Process</button>
+        <button type="button" class="btn btn-primary" onclick="processVocab()">Process</button>
+        <hr>
         <table id="length_table">
         </table>
-
-        <button onClick="guess('A');">A</button>
-        <button onClick="guess('B');">B</button>
-        <button onClick="guess('C');">C</button>
-        <button onClick="guess('D');">D</button>
-        <button onClick="guess('E');">E</button>
-        <button onClick="guess('F');">F</button>
-        <button onClick="guess('G');">G</button>
-        <button onClick="guess('H');">H</button>
-        <button onClick="guess('I');">I</button>
-        <button onClick="guess('J');">J</button>
-        <button onClick="guess('K');">K</button>
-        <button onClick="guess('L');">L</button>
-        <button onClick="guess('M');">M</button>
-        <button onClick="guess('N');">N</button>
-        <button onClick="guess('O');">O</button>
-        <button onClick="guess('P');">P</button>
-        <button onClick="guess('Q');">Q</button>
-        <button onClick="guess('R');">R</button>
-        <button onClick="guess('S');">S</button>
-        <button onClick="guess('T');">T</button>
-        <button onClick="guess('U');">U</button>
-        <button onClick="guess('V');">V</button>
-        <button onClick="guess('W');">W</button>
-        <button onClick="guess('X');">X</button>
-        <button onClick="guess('Y');">Y</button>
-        <button onClick="guess('Z');">Z</button>
+        <hr>
+        <div class="btn-group" role="group" aria-label="...">
+          <button type="button" class="btn btn-default" onClick="guess('A');">A</button>
+          <button type="button" class="btn btn-default" onClick="guess('B');">B</button>
+          <button type="button" class="btn btn-default" onClick="guess('C');">C</button>
+          <button type="button" class="btn btn-default" onClick="guess('D');">D</button>
+          <button type="button" class="btn btn-default" onClick="guess('E');">E</button>
+          <button type="button" class="btn btn-default" onClick="guess('F');">F</button>
+          <button type="button" class="btn btn-default" onClick="guess('G');">G</button>
+          <button type="button" class="btn btn-default" onClick="guess('H');">H</button>
+          <button type="button" class="btn btn-default" onClick="guess('I');">I</button>
+          <button type="button" class="btn btn-default" onClick="guess('J');">J</button>
+          <button type="button" class="btn btn-default" onClick="guess('K');">K</button>
+          <button type="button" class="btn btn-default" onClick="guess('L');">L</button>
+          <button type="button" class="btn btn-default" onClick="guess('M');">M</button>
+          <button type="button" class="btn btn-default" onClick="guess('N');">N</button>
+          <button type="button" class="btn btn-default" onClick="guess('O');">O</button>
+          <button type="button" class="btn btn-default" onClick="guess('P');">P</button>
+          <button type="button" class="btn btn-default" onClick="guess('Q');">Q</button>
+          <button type="button" class="btn btn-default" onClick="guess('R');">R</button>
+          <button type="button" class="btn btn-default" onClick="guess('S');">S</button>
+          <button type="button" class="btn btn-default" onClick="guess('T');">T</button>
+          <button type="button" class="btn btn-default" onClick="guess('U');">U</button>
+          <button type="button" class="btn btn-default" onClick="guess('V');">V</button>
+          <button type="button" class="btn btn-default" onClick="guess('W');">W</button>
+          <button type="button" class="btn btn-default" onClick="guess('X');">X</button>
+          <button type="button" class="btn btn-default" onClick="guess('Y');">Y</button>
+          <button type="button" class="btn btn-default" onClick="guess('Z');">Z</button>
+        </div>
         <!--this paragraph is for keeping track of word -->
         <p id="guessing"></p>
 
