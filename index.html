@@ -1,38 +1,92 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+
         <title>Hangman Demo</title>
     </head>
     <body>
-        <input type="file" id="files" name="files[]" multiple />
+      <nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Hangman Demo</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">
+          <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+          Home
+          <span class="sr-only">(current)</span></a>
+        </li>
+        <li><a href="#">
+          <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+          D-Separation Demo</a>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+            More<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Course Homepage</a></li>
+            <li><a href="#">Useful links</a></li>
+            <li><a href="#">CSE Page</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <form class="navbar-form navbar-left" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+      <!--
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+          </ul>
+        </li>
+      </ul>-->
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+      <!-- Include all compiled plugins (below), or include individual files as needed -->
+      <script src="js/bootstrap.min.js"></script>
+      <div class="form-group has-success">
+        <label class="control-label" for="inputSuccess1">Give a Dictionary file</label>
+        <input type="file" class="form_control" id="files" name="files[]" multiple />
+        <p class="help-block">Dictionary file contains a word per line</p>
+
+      </div>
         <output id="list"></output>
+
         <p id="fileContents"></p>
         <button onclick="processVocab()">Process</button>
-        <table>
-          <tr>
-            <td>
-              words length 1<input id="length1" type="radio" name="length" value = "1" onclick="setVocabLength()">
-            </td>
-          </tr>
-          <tr>
-            <td>
-              words length 2<input id="length2" type="radio" name="length" value = "2" onclick="setVocabLength()">
-            </td>
-          </tr>
-          <tr>
-            <td>
-               words length 3<input id="length3" type="radio" name="length" value = "3" onclick="setVocabLength()">
-            </td>
-          </tr>
-          <tr>
-            <td>
-               words length 4<input id="length4" type="radio" name="length" value = "4" onclick="setVocabLength()">
-            </td>
-          </tr>
-          <tr>
-            <td>
-               words length 5<input id="length5" type="radio" name="length" value = "5" onclick="setVocabLength()">
-            </td>
-          </tr>
+        <table id="length_table">
         </table>
 
         <button onClick="guess('A');">A</button>
@@ -103,6 +157,7 @@
           document.getElementById('files').addEventListener('change', handleFileSelect, false);
 
           function processVocab(){
+            /*
             //Init char frequency list
             for(var i = 0; i < 26; i++){
                 char_frequency[i] = 0;
@@ -117,39 +172,29 @@
             }
             for(var i = 0; i < 26; i++){
                 console.log(String.fromCharCode(i + 65) + ": " +char_frequency[i]);
-            }
+            }*/
 
             console.log(vocab);
             vocab.sort(function(a, b){
               return a.length - b.length; // ASC -> a - b; DESC -> b - a
             });
             console.log(vocab);
+            var index = 0;
+            for(var i = 0; i < vocab.length; i++){
+              var last_index = index;
+              console.log(vocab[i].length + vocab[i]);
+              if(index < vocab[i].length){
+                index = vocab[i].length;
+              }
+              if(index != last_index){
+                document.getElementById("length_table").innerHTML += "<tr>\n<td>words length " + index + "<input id=\"length1\" type=\"radio\" name=\"length\" value = \"" + index + "\" onclick=\"setVocabLength(" + index + ")\"></td>\n</tr>";
+              }
+            }
           }
-          function setVocabLength(){
+          function setVocabLength(selected_length){
 
             guess_pool = [];
-            if(document.getElementById('length1').checked){
-              console.log("length set to 1");
-              word_length = 1;
-            }
-            else if(document.getElementById('length2').checked){
-              console.log("length set to 2");
-              word_length = 2;
-
-            }
-            else if(document.getElementById('length3').checked){
-              console.log("length set to 3");
-              word_length = 3;
-
-            }
-            else if(document.getElementById('length4').checked){
-              console.log("length set to 4");
-              word_length = 4;
-            }
-            else if(document.getElementById('length5').checked){
-              console.log("length set to 5");
-              word_length = 5;
-            }
+            word_length = selected_length;
             //If file read in happened
             if(vocab.length != 0){
               for(var i = 0; i < vocab.length; i++){
@@ -199,7 +244,8 @@
               }
               var tmp_index = 0;
               correct_index = correct_index.filter(onlyUnique);
-              correct_index.sort();
+              //Sort can't use the default string comparsion, need to provide a parameter value
+              correct_index.sort(function(a, b){return a-b});
               console.log(correct_index);
               console.log("length is " + guessing_word.length);
               for(var i = 0; i < guessing_word.length; i++){
