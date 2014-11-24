@@ -227,12 +227,17 @@
             }
             document.getElementById("probability").innerHTML = "Best Guess: <br/>";
             list_of_possible_guess = [];
+            if(correct_index.length == 0){
+              for(var i = 0; i < guess_pool.length; i++){
+                list_of_possible_guess[i] = guess_pool[i];
+              }
+            }
             for(var i = 0; i < guess_pool.length; i++){
               var current_word = guess_pool[i];
               var good = false;
               for(var j = 0; j < correct_index.length; j++){
-                console.log(guessing_word.charAt(correct_index[j]));
-                console.log(current_word.charAt(correct_index[j]));
+                //console.log(guessing_word.charAt(correct_index[j]));
+                //console.log(current_word.charAt(correct_index[j]));
                 if(guessing_word.charAt(correct_index[j]) == current_word.charAt(correct_index[j])){
                   console.log("here");
                 }
@@ -245,12 +250,15 @@
               if(good){
                 console.log("pushing" + current_word);
                 list_of_possible_guess.push(current_word);
+                console.log("list size" + list_of_possible_guess.length);
               }
             }
             console.log("list of possible guess");
             console.log(list_of_possible_guess);
             for(var i = 0; i < list_of_possible_guess.length; i++){
-              document.getElementById("probability").innerHTML += list_of_possible_guess[i] + "<br/>";
+              //prob for P(W = word)
+              var prob = 1/list_of_possible_guess.length;
+              document.getElementById("probability").innerHTML += list_of_possible_guess[i] + " with probability " + prob +  "<br/>";
             }
 
           }
