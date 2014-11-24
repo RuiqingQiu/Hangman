@@ -133,7 +133,11 @@
           //Tmp user interface for displaying the guessing progress
           var tmp_result = "";
 
+          //Keep track of the corrent index we have now so far
           var correct_index = [];
+
+          //Keep track of the letter we have guessed wrong on
+          var list_of_incorrect_guess = [];
 
           function handleFileSelect(evt) {
             var files = evt.target.files; // FileList object
@@ -192,7 +196,6 @@
             }
           }
           function setVocabLength(selected_length){
-
             guess_pool = [];
             word_length = selected_length;
             //If file read in happened
@@ -210,6 +213,7 @@
               console.log("the word is " + guessing_word);
               tmp_result = "";
               correct_index = [];
+              list_of_incorrect_guess = [];
               for(var i = 0; i < guessing_word.length; i++){
                 console.log(guessing_word.charAt(i));
                 tmp_result += "_ ";
@@ -237,6 +241,7 @@
             console.log(letter);
             var index = indexes(guessing_word, "" + letter);
             console.log(index);
+            //Check if the letter happen to be in the word we are guessing
             if(index.length > 0){
               console.log("correct guessed");
               for(var i = 0; i < index.length; i++){
@@ -263,21 +268,43 @@
                   }
                 }
               }
+              //Output the current result
               document.getElementById("guessing").innerHTML = tmp_result + "<br/>";
+              //If it's done then output DONE
               if(correct_index.length == guessing_word.length){
                 document.getElementById("progress").innerHTML += "DONE!" + "<br/>";
               }
             }
             else{
               console.log("wrong");
+              list_of_incorrect_guess.push(letter);
+              //console.log("list of incorret guess:");
+              //console.log(list_of_incorrect_guess);
             }
             document.getElementById("probability").innerHTML = "Best Guess: <br/>";
             list_of_possible_guess = [];
             if(correct_index.length == 0){
+              console.log("enter correct index ==0");
+              console.log(list_of_incorrect_guess);
               for(var i = 0; i < guess_pool.length; i++){
-                list_of_possible_guess[i] = guess_pool[i];
+                var never_appear = true;
+                for(var k = 0; k < list_of_incorrect_guess.length; k++){
+                  var current_word = guess_pool[i];
+                  if(current_word.indexOf(list_of_incorrect_guess[k]) === -1){
+                  }
+                  else{
+                    never_appear = false;
+                    break;
+                  }
+                }
+                if(never_appear){
+                  list_of_possible_guess.push(guess_pool[i]);
+                }
+                never_appear = false;
+
               }
             }
+            //This for loop is for finding the possible words in the guess pool
             for(var i = 0; i < guess_pool.length; i++){
               var current_word = guess_pool[i];
               var good = false;
@@ -293,13 +320,33 @@
                 }
                 good = true;
               }
+              //If the vocab satisfy our correct index result
               if(good){
-                console.log("pushing" + current_word);
-                list_of_possible_guess.push(current_word);
-                console.log("list size" + list_of_possible_guess.length);
+                //We do a second check here to see if the wrong guessed letter have appear in such word
+                if(list_of_incorrect_guess.length == 0){
+                  //console.log("pushing" + current_word);
+                  list_of_possible_guess.push(current_word);
+                  //console.log("list size" + list_of_possible_guess.length);
+                }
+                else{
+                  var never_appear = true;
+                  for(var k = 0; k < list_of_incorrect_guess.length; k++){
+                    if(current_word.indexOf(list_of_incorrect_guess[k]) === -1){ 
+                    }
+                    else{
+                      never_appear = false;
+                      break;
+                    }
+                  }
+                  if(never_appear){
+                    if(list_of_possible_guess.indexOf(current_word) === -1){
+                      list_of_possible_guess.push(current_word);
+                    }
+                  }
+                }
               }
             }
-            console.log("list of possible guess");
+            //console.log("list of possible guess");
             console.log(list_of_possible_guess);
             for(var i = 0; i < list_of_possible_guess.length; i++){
               //prob for P(W = word)
