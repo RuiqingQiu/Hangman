@@ -79,16 +79,32 @@
       <div class="form-group has-success">
         <label class="control-label" for="inputSuccess1">Give a Dictionary file</label>
         <input type="file" class="form_control" id="files" name="files[]" multiple />
-        <p class="help-block">Dictionary file contains a word per line</p>
-
+        <p class="help-block">Dictionary file contains one word per line</p>
       </div>
         <output id="list"></output>
 
         <p id="fileContents"></p>
         <button type="button" class="btn btn-primary" onclick="processVocab()">Process</button>
         <hr>
-        <table id="length_table">
-        </table>
+
+        <div id="pick_length">
+          <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+              Words Length
+              <span class="caret"></span>
+            </button>
+            <ul id="ul_length" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+              <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>-->
+            </ul>
+          </div>
+       </div>
+
+
+        <!--<table id="length_table">
+        </table>-->
         <hr>
         <div class="btn-group" role="group" aria-label="...">
           <button type="button" class="btn btn-default" onClick="guess('A');">A</button>
@@ -103,7 +119,7 @@
           <button type="button" class="btn btn-default" onClick="guess('J');">J</button>
           <button type="button" class="btn btn-default" onClick="guess('K');">K</button>
           <button type="button" class="btn btn-default" onClick="guess('L');">L</button>
-          <button type="button" class="btn btn-default" onClick="guess('M');">M</button>
+          <button type="button" class="btn btn-default" onClick="guess('M');">M</button><br/>
           <button type="button" class="btn btn-default" onClick="guess('N');">N</button>
           <button type="button" class="btn btn-default" onClick="guess('O');">O</button>
           <button type="button" class="btn btn-default" onClick="guess('P');">P</button>
@@ -122,9 +138,12 @@
         <p id="guessing"></p>
 
         <p id="progress"></p>
-
+        <div id="container" style="width:50%; height:400px;"></div>
         <p id="probability"></p>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="http://code.highcharts.com/highcharts.js"></script>
         <script>
+        
           //Global variable for keeping all the vocabs.
           var vocab = [];
           var char_frequency = [];
@@ -141,6 +160,8 @@
 
           //Keep track of the letter we have guessed wrong on
           var list_of_incorrect_guess = [];
+          //Keep track of the letter we have guessed correctly
+          var list_of_correct_guess = [];
 
           function handleFileSelect(evt) {
             var files = evt.target.files; // FileList object
@@ -194,7 +215,8 @@
                 index = vocab[i].length;
               }
               if(index != last_index){
-                document.getElementById("length_table").innerHTML += "<tr>\n<td>words length " + index + "<input id=\"length1\" type=\"radio\" name=\"length\" value = \"" + index + "\" onclick=\"setVocabLength(" + index + ")\"></td>\n</tr>";
+                //document.getElementById("length_table").innerHTML += "<tr>\n<td>words length " + index + "<input id=\"length1\" type=\"radio\" name=\"length\" value = \"" + index + "\" onclick=\"setVocabLength(" + index + ")\"></td>\n</tr>";
+                document.getElementById("ul_length").innerHTML += "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" value = \"" + index + "\" onclick=\"setVocabLength(" + index + ")\">Words of Length " + index + "</a></li>";
               }
             }
           }
@@ -222,6 +244,8 @@
                 tmp_result += "_ ";
               }
               document.getElementById("guessing").innerHTML = tmp_result + "<br/>";
+              document.getElementById("progress").innerHTML = "";
+              document.getElementById("probability").innerHTML = "";
             }
             else{
               alert("need to read a vocab file");
@@ -277,15 +301,21 @@
               if(correct_index.length == guessing_word.length){
                 document.getElementById("progress").innerHTML += "DONE!" + "<br/>";
               }
+              var tuple = {letter: letter, length: index.length};
+              list_of_correct_guess.filter(onlyUnique);
+
             }
             else{
               console.log("wrong");
               list_of_incorrect_guess.push(letter);
+              list_of_incorrect_guess.filter(onlyUnique);
               //console.log("list of incorret guess:");
               //console.log(list_of_incorrect_guess);
             }
             document.getElementById("probability").innerHTML = "Best Guess: <br/>";
             list_of_possible_guess = [];
+            
+            //If it was not a correct guess
             if(correct_index.length == 0){
               console.log("enter correct index ==0");
               console.log(list_of_incorrect_guess);
@@ -342,8 +372,20 @@
                     }
                   }
                   if(never_appear){
+
+                    //Check it doesn't contain duplicates
                     if(list_of_possible_guess.indexOf(current_word) === -1){
-                      list_of_possible_guess.push(current_word);
+                      var have_correct_number_of_letter = true;
+                      //Third check, having the same amount of correct guessed letter
+                      for(var l = 0; l < list_of_correct_guess.length; l++){
+                        if(current_word.split(new RegExp(list_of_correct_guess[l].letter, "gi").length-1) != list_of_correct_guess[l].length){
+                          have_correct_number_of_letter = false;
+                          break;
+                        }
+                      }
+                      if(have_correct_number_of_letter){
+                        list_of_possible_guess.push(current_word);
+                      }
                     }
                   }
                 }
@@ -351,12 +393,83 @@
             }
             //console.log("list of possible guess");
             console.log(list_of_possible_guess);
+            list_of_prob = []
             for(var i = 0; i < list_of_possible_guess.length; i++){
               //prob for P(W = word)
               var prob = 1/list_of_possible_guess.length;
+              list_of_prob.push([list_of_possible_guess[i], prob]);
               document.getElementById("probability").innerHTML += list_of_possible_guess[i] + " with probability " + prob +  "<br/>";
             }
 
+            $(function () {
+
+    $(document).ready(function () {
+
+        // Build the chart
+        $('#container').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: {
+                text: 'Probability Distribution'
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: false
+                    },
+                    showInLegend: true
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'next guess probability',
+                data: list_of_prob
+            }]
+        });
+    });
+
+});
+
+            /*
+            $(function () { 
+              $('#container').highcharts({
+                chart: {
+                  type: 'column'
+                },
+                title: {
+                  text: 'Probability Distribution'
+                },
+                xAxis: {
+                  categories: list_of_possible_guess
+                },
+                yAxis: {
+                  title: {
+                    text: 'Probability'
+                  }
+                },
+                plotOptions: {
+                  column: {
+                    pointPadding: 0,
+                    borderWidth: 1,
+                    groupPadding: 0,
+                    shadow: true
+                  }
+                },
+                series: [
+                  {
+                    data: list_of_prob
+                  }]
+                });
+            });
+            */
           }
           /**
            * Given a string and its find, return all indexs of its occurences
@@ -376,7 +489,7 @@
             return self.indexOf(value) === index;
           }
 
-
+          //TODO, eliminte words that have multiple letter S
         </script>
     </body>
 </html>
