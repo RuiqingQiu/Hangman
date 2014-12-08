@@ -86,7 +86,13 @@
         <p id="fileContents"></p>
         <button type="button" class="btn btn-primary" onclick="processVocab()">Process</button>
         <hr>
-
+        <div class="row">
+          <div class="col-md-4 progress">
+            <div id="p_bar" class="progress-bar" role="progressbar progress-bar-striped" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              0%
+            </div>
+          </div>
+        </div>
         <div id="pick_length">
           <div class="dropdown">
             <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
@@ -135,10 +141,13 @@
           <button type="button" class="btn btn-default" onClick="guess('Z');">Z</button>
         </div>
         <!--this paragraph is for keeping track of word -->
-        <p id="guessing"></p>
+        <p id="guessing" style="font-size: 25px"></p>
 
         <p id="progress"></p>
-        <div id="container" style="width:50%; height:400px;"></div>
+        <div class="row">
+          <div id="container" class="col-md-4" style="width:50%; height:400px;"></div>
+          <div id="container2" class="col-md-4" style="width:50%; height:400px;"></div>
+        </div>
         <p id="probability"></p>
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script src="http://code.highcharts.com/highcharts.js"></script>
@@ -162,6 +171,8 @@
           var list_of_incorrect_guess = [];
           //Keep track of the letter we have guessed correctly
           var list_of_correct_guess = [];
+
+          var letter_corrects = [];
 
           function handleFileSelect(evt) {
             var files = evt.target.files; // FileList object
@@ -209,6 +220,8 @@
             console.log(vocab);
             var index = 0;
             for(var i = 0; i < vocab.length; i++){
+              document.getElementById("p_bar").style.width= (i+1)*100.0/vocab.length + "%";
+              document.getElementById("p_bar").innerHTML = (i+1)*100.0/vocab.length + "%";
               var last_index = index;
               console.log(vocab[i].length + vocab[i]);
               if(index < vocab[i].length){
@@ -251,6 +264,73 @@
               alert("need to read a vocab file");
             }
           }
+          $(function () {
+              $(document).ready(function () {
+                // Build the chart
+                $('#container2').highcharts({
+                  chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                  },
+                  title: {
+                    text: 'Letter Probability Distribution'
+                  },
+                  tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                  },
+                  plotOptions: {
+                    pie: {
+                      allowPointSelect: true,
+                      cursor: 'pointer',
+                      dataLabels: {
+                        enabled: false
+                        },
+                      showInLegend: true
+                    }
+                  },
+                  series: [{
+                    type: 'pie',
+                    name: 'next guess probability',
+                    data: []
+                  }]
+                });
+              });
+          });
+
+            $(function () {
+              $(document).ready(function () {
+                // Build the chart
+                $('#container').highcharts({
+                  chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                  },
+                  title: {
+                    text: 'Words Probability Distribution'
+                  },
+                  tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                  },
+                  plotOptions: {
+                    pie: {
+                      allowPointSelect: true,
+                      cursor: 'pointer',
+                      dataLabels: {
+                        enabled: false
+                        },
+                      showInLegend: true
+                    }
+                  },
+                  series: [{
+                    type: 'pie',
+                    name: 'next guess probability',
+                    data: []
+                  }]
+                });
+              });
+          });
 
           /**
            * Function called when the letter keyboard is pressed and one 
@@ -303,7 +383,7 @@
               }
               var tuple = {letter: letter, length: index.length};
               list_of_correct_guess.filter(onlyUnique);
-
+              letter_corrects.push(letter);
             }
             else{
               console.log("wrong");
@@ -398,45 +478,140 @@
               //prob for P(W = word)
               var prob = 1/list_of_possible_guess.length;
               list_of_prob.push([list_of_possible_guess[i], prob]);
-              document.getElementById("probability").innerHTML += list_of_possible_guess[i] + " with probability " + prob +  "<br/>";
+              //document.getElementById("probability").innerHTML += list_of_possible_guess[i] + " with probability " + prob +  "<br/>";
             }
 
+            char_frequency = [];
+            for (var i = 0; i < 26; i++){
+              char_frequency[i] = 0;
+            }
+            total = 0.0
+            for(var i = 0; i < list_of_possible_guess.length;i++){
+              var word = list_of_possible_guess[i];
+              for(var j = 0; j < word.length; j++){
+                    char_frequency[word.charCodeAt(j)-65] += 1; 
+                    total += 1.0
+                    //console.log(word.charCodeAt(j));
+               }
+            }
+            pie_chart_data = [];
+            console.log("entered");
+
+            console.log(letter_corrects)
+            for(var i = 0; i < 26; i++){
+              if(letter_corrects.indexOf(String.fromCharCode(65 + i)) === -1){
+                pie_chart_data.push(char_frequency[i]/total);
+
+              }
+              else{
+                pie_chart_data.push(0);
+
+
+              }
+            }
+            bar_char_y = [];
+            for(var i = 0; i < 26; i++){
+              bar_char_y[i] = String.fromCharCode(65 + i);
+            }
+
+             $(function () { 
+              $('#container2').highcharts({
+                chart: {
+                  type: 'column'
+                },
+                title: {
+                  text: 'Letter Probability Distribution'
+                },
+                xAxis: {
+                  categories: bar_char_y
+                },
+                yAxis: {
+                  title: {
+                    text: 'Probability'
+                  }
+                },
+                plotOptions: {
+                  column: {
+                    pointPadding: 0,
+                    borderWidth: 1,
+                    groupPadding: 0,
+                    shadow: true
+                  }
+                },
+                series: [
+                  {
+                    data: pie_chart_data
+                  }]
+                });
+            });
+             /*
             $(function () {
-
-    $(document).ready(function () {
-
-        // Build the chart
-        $('#container').highcharts({
-            chart: {
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false
-            },
-            title: {
-                text: 'Probability Distribution'
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
+              $(document).ready(function () {
+                // Build the chart
+                $('#container2').highcharts({
+                  chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                  },
+                  title: {
+                    text: 'Letter Probability Distribution'
+                  },
+                  tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                  },
+                  plotOptions: {
+                    pie: {
+                      allowPointSelect: true,
+                      cursor: 'pointer',
+                      dataLabels: {
                         enabled: false
-                    },
-                    showInLegend: true
-                }
-            },
-            series: [{
-                type: 'pie',
-                name: 'next guess probability',
-                data: list_of_prob
-            }]
-        });
-    });
+                        },
+                      showInLegend: true
+                    }
+                  },
+                  series: [{
+                    type: 'pie',
+                    name: 'next guess probability',
+                    data: pie_chart_data
+                  }]
+                });
+              });
+          });*/
 
-});
+            $(function () {
+              $(document).ready(function () {
+                // Build the chart
+                $('#container').highcharts({
+                  chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                  },
+                  title: {
+                    text: 'Words Probability Distribution'
+                  },
+                  tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                  },
+                  plotOptions: {
+                    pie: {
+                      allowPointSelect: true,
+                      cursor: 'pointer',
+                      dataLabels: {
+                        enabled: false
+                        },
+                      showInLegend: true
+                    }
+                  },
+                  series: [{
+                    type: 'pie',
+                    name: 'next guess probability',
+                    data: list_of_prob
+                  }]
+                });
+              });
+          });
 
             /*
             $(function () { 
