@@ -84,7 +84,11 @@
         <output id="list"></output>
 
         <p id="fileContents"></p>
-        <button type="button" class="btn btn-primary" onclick="processVocab()">Process</button>
+        <div class="row">
+          <button type="button" class="col-md-1 btn btn-primary" onclick="processVocab()">Process</button>
+          <div class="col-md-3"></div>
+          <button type="button" class="btn"><a href="common.txt" download>Download the dictionary file</a></button>
+        </div>
         <hr>
         <div class="row">
           <div class="col-md-4 progress">
@@ -112,6 +116,7 @@
         <!--<table id="length_table">
         </table>-->
         <hr>
+        <p id="number_of_guesses"></p>
         <div class="btn-group" role="group" aria-label="...">
           <button type="button" class="btn btn-default" onClick="guess('A');">A</button>
           <button type="button" class="btn btn-default" onClick="guess('B');">B</button>
@@ -145,14 +150,16 @@
 
         <p id="progress"></p>
         <div class="row">
-          <div id="container" class="col-md-4" style="width:50%; height:400px;"></div>
+          <!--<div id="container" class="col-md-4" style="width:50%; height:400px;"></div>-->
           <div id="container2" class="col-md-4" style="width:50%; height:400px;"></div>
         </div>
         <p id="probability"></p>
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script src="http://code.highcharts.com/highcharts.js"></script>
         <script>
-        
+         
+          var max_num_guesses = 7;
+          var guess_counter = 0;
           //Global variable for keeping all the vocabs.
           var vocab = [];
           var char_frequency = [];
@@ -213,11 +220,9 @@
                 console.log(String.fromCharCode(i + 65) + ": " +char_frequency[i]);
             }*/
 
-            console.log(vocab);
             vocab.sort(function(a, b){
               return a.length - b.length; // ASC -> a - b; DESC -> b - a
             });
-            console.log(vocab);
             var index = 0;
             for(var i = 0; i < vocab.length; i++){
               document.getElementById("p_bar").style.width= (i+1)*100.0/vocab.length + "%";
@@ -233,9 +238,40 @@
               }
             }
           }
-          function setVocabLength(selected_length){
+          function gameover_win(){
             guess_pool = [];
+            letter_corrects = [];
+            correct_index = [];
+            list_of_incorrect_guess = [];
+            guess_counter = 0;
+            guessing_word = null;
+            word_length = 0;
+            //If file read in happened
+            document.getElementById("guessing").innerHTML = "Pick Word Length to Restart";
+            //document.getElementById("progress").innerHTML = "";
+            document.getElementById("probability").innerHTML = "";
+          }
+          function gameover(){
+            guess_pool = [];
+            letter_corrects = [];
+            correct_index = [];
+            list_of_incorrect_guess = [];
+            guess_counter = 0;
+            guessing_word = null;
+            word_length = 0;
+            //If file read in happened
+            document.getElementById("guessing").innerHTML = "Pick Word Length to Restart";
+            document.getElementById("progress").innerHTML = "";
+            document.getElementById("probability").innerHTML = "";
+          }
+
+          function setVocabLength(selected_length){
+            document.getElementById("number_of_guesses").innerHTML = "You have " + (max_num_guesses - guess_counter) + " of guesses";
+            guess_pool = [];
+            letter_corrects = [];
             word_length = selected_length;
+            correct_index = [];
+            list_of_incorrect_guess = [];
             //If file read in happened
             if(vocab.length != 0){
               for(var i = 0; i < vocab.length; i++){
@@ -250,8 +286,6 @@
               console.log(guess_pool);
               console.log("the word is " + guessing_word);
               tmp_result = "";
-              correct_index = [];
-              list_of_incorrect_guess = [];
               for(var i = 0; i < guessing_word.length; i++){
                 console.log(guessing_word.charAt(i));
                 tmp_result += "_ ";
@@ -259,78 +293,68 @@
               document.getElementById("guessing").innerHTML = tmp_result + "<br/>";
               document.getElementById("progress").innerHTML = "";
               document.getElementById("probability").innerHTML = "";
+
+              char_frequency = [];
+              for (var i = 0; i < 26; i++){
+                char_frequency[i] = 0;
+              }
+              total = 0.0
+              for(var i = 0; i < guess_pool.length;i++){
+                var word = guess_pool[i];
+                for(var j = 0; j < word.length; j++){
+                    char_frequency[word.charCodeAt(j)-65] += 1; 
+                    total += 1.0
+                    //console.log(word.charCodeAt(j));
+                }
+              }
+              pie_chart_data = [];
+
+              for(var i = 0; i < 26; i++){
+                pie_chart_data.push(char_frequency[i]/guess_pool.length);
+              }
+              bar_char_y = [];
+              for(var i = 0; i < 26; i++){
+                bar_char_y[i] = String.fromCharCode(65 + i);
+              }
+
+               $(function () { 
+                $('#container2').highcharts({
+                  chart: {
+                    type: 'column'
+                  },
+                  title: {
+                    text: 'Next Best Letter to Guess'
+                  },
+                  xAxis: {
+                    categories: bar_char_y
+                  },
+                  yAxis: {
+                    title: {
+                      text: 'Probability'
+                    }
+                  },
+                  plotOptions: {
+                    column: {
+                      pointPadding: 0,
+                      borderWidth: 1,
+                      groupPadding: 0,
+                      shadow: true
+                    }
+                  },
+                  series: [
+                    {
+                      data: pie_chart_data
+                    }]
+                  });
+              });
+
+
             }
             else{
               alert("need to read a vocab file");
             }
           }
-          $(function () {
-              $(document).ready(function () {
-                // Build the chart
-                $('#container2').highcharts({
-                  chart: {
-                    plotBackgroundColor: null,
-                    plotBorderWidth: null,
-                    plotShadow: false
-                  },
-                  title: {
-                    text: 'Letter Probability Distribution'
-                  },
-                  tooltip: {
-                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-                  },
-                  plotOptions: {
-                    pie: {
-                      allowPointSelect: true,
-                      cursor: 'pointer',
-                      dataLabels: {
-                        enabled: false
-                        },
-                      showInLegend: true
-                    }
-                  },
-                  series: [{
-                    type: 'pie',
-                    name: 'next guess probability',
-                    data: []
-                  }]
-                });
-              });
-          });
 
-            $(function () {
-              $(document).ready(function () {
-                // Build the chart
-                $('#container').highcharts({
-                  chart: {
-                    plotBackgroundColor: null,
-                    plotBorderWidth: null,
-                    plotShadow: false
-                  },
-                  title: {
-                    text: 'Words Probability Distribution'
-                  },
-                  tooltip: {
-                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-                  },
-                  plotOptions: {
-                    pie: {
-                      allowPointSelect: true,
-                      cursor: 'pointer',
-                      dataLabels: {
-                        enabled: false
-                        },
-                      showInLegend: true
-                    }
-                  },
-                  series: [{
-                    type: 'pie',
-                    name: 'next guess probability',
-                    data: []
-                  }]
-                });
-              });
-          });
 
           /**
            * Function called when the letter keyboard is pressed and one 
@@ -342,12 +366,17 @@
               alert("pick the word length");
             }
             else{
-              document.getElementById("progress").innerHTML += "guessing letter " + letter + "<br/>";
+              guess_counter += 1;
+              document.getElementById("number_of_guesses").innerHTML = "You have " + (max_num_guesses - guess_counter) + " of guesses";
+
+              document.getElementById("progress").innerHTML += "#" + guess_counter + " guess(es), guessing letter " + letter + "<br/>";
             }
+
             tmp_result = "";
             console.log(letter);
             var index = indexes(guessing_word, "" + letter);
             console.log(index);
+
             //Check if the letter happen to be in the word we are guessing
             if(index.length > 0){
               console.log("correct guessed");
@@ -379,53 +408,43 @@
               document.getElementById("guessing").innerHTML = tmp_result + "<br/>";
               //If it's done then output DONE
               if(correct_index.length == guessing_word.length){
-                document.getElementById("progress").innerHTML += "DONE!" + "<br/>";
+                document.getElementById("progress").innerHTML += "DONE! The word is " + guessing_word + "<br/>";
+                gameover_win();
+                return;
+              }
+              else if(guess_counter == 7){
+                document.getElementById("progress").innerHTML += "GAME OVER!" + "<br/>";
+                gameover();
+                return;
               }
               var tuple = {letter: letter, length: index.length};
               list_of_correct_guess.filter(onlyUnique);
               letter_corrects.push(letter);
             }
+            //Wrong guess
             else{
               console.log("wrong");
               list_of_incorrect_guess.push(letter);
               list_of_incorrect_guess.filter(onlyUnique);
+              if(guess_counter == 7){
+                document.getElementById("progress").innerHTML += "GAME OVER!" + "<br/>";
+                gameover();
+                return;
+              }
               //console.log("list of incorret guess:");
               //console.log(list_of_incorrect_guess);
             }
-            document.getElementById("probability").innerHTML = "Best Guess: <br/>";
-            list_of_possible_guess = [];
-            
-            //If it was not a correct guess
-            if(correct_index.length == 0){
-              console.log("enter correct index ==0");
-              console.log(list_of_incorrect_guess);
-              for(var i = 0; i < guess_pool.length; i++){
-                var never_appear = true;
-                for(var k = 0; k < list_of_incorrect_guess.length; k++){
-                  var current_word = guess_pool[i];
-                  if(current_word.indexOf(list_of_incorrect_guess[k]) === -1){
-                  }
-                  else{
-                    never_appear = false;
-                    break;
-                  }
-                }
-                if(never_appear){
-                  list_of_possible_guess.push(guess_pool[i]);
-                }
-                never_appear = false;
 
-              }
-            }
+
+            list_of_possible_guess = [];            
             //This for loop is for finding the possible words in the guess pool
             for(var i = 0; i < guess_pool.length; i++){
               var current_word = guess_pool[i];
-              var good = false;
+              var good = true;
               for(var j = 0; j < correct_index.length; j++){
                 //console.log(guessing_word.charAt(correct_index[j]));
                 //console.log(current_word.charAt(correct_index[j]));
                 if(guessing_word.charAt(correct_index[j]) == current_word.charAt(correct_index[j])){
-                  console.log("here");
                 }
                 else{
                   good = false;
@@ -437,8 +456,40 @@
               if(good){
                 //We do a second check here to see if the wrong guessed letter have appear in such word
                 if(list_of_incorrect_guess.length == 0){
+                  var never_appear = true;
+                  if(never_appear){
+                    //Check it doesn't contain duplicates
+                    if(list_of_possible_guess.indexOf(current_word) === -1){
+                      var have_correct_number_of_letter = true;
+                      //Third check, having the same amount of correct guessed letter
+                      for(var l = 0; l < letter_corrects.length; l++){
+                        var current_total = 0;//keep track how many times the letter occur
+                        var correct_total = 0;
+                        for(var q = 0; q < current_word.length; q++){
+                          if(current_word.charAt(q) == letter_corrects[l]){
+                            current_total += 1;
+                          }
+                        }
+                        for(var q = 0; q < guessing_word.length; q++){
+                          if(guessing_word.charAt(q) == letter_corrects[l]){
+                            correct_total += 1;
+                          }
+                        }
+                        console.log("current_total: " + current_total);
+                        console.log("correct_total: " + correct_total);
+                        if(current_total != correct_total){
+                          have_correct_number_of_letter = false;
+                          console.log("not pushing " + current_word);
+                          break;
+                        }
+                      }
+                      if(have_correct_number_of_letter){
+                          console.log("pushing " + current_word);
+                          list_of_possible_guess.push(current_word);
+                      }
+                    }
+                  }
                   //console.log("pushing" + current_word);
-                  list_of_possible_guess.push(current_word);
                   //console.log("list size" + list_of_possible_guess.length);
                 }
                 else{
@@ -452,12 +503,12 @@
                     }
                   }
                   if(never_appear){
-
                     //Check it doesn't contain duplicates
                     if(list_of_possible_guess.indexOf(current_word) === -1){
                       var have_correct_number_of_letter = true;
                       //Third check, having the same amount of correct guessed letter
                       for(var l = 0; l < list_of_correct_guess.length; l++){
+                        console.log("hello" + current_word.split(new RegExp(list_of_correct_guess[l].letter, "gi").length-1));
                         if(current_word.split(new RegExp(list_of_correct_guess[l].letter, "gi").length-1) != list_of_correct_guess[l].length){
                           have_correct_number_of_letter = false;
                           break;
@@ -481,6 +532,62 @@
               //document.getElementById("probability").innerHTML += list_of_possible_guess[i] + " with probability " + prob +  "<br/>";
             }
 
+
+            // var denominator = 0.0;
+            // var good = true;
+
+            // for(var i = 0; i < list_of_possible_guess.length; i++){
+            //   good = true;
+            //   console.log("posterior prob");
+            //   console.log(letter_corrects);
+            //   for(var j = 0; j < letter_corrects.length; j++){
+            //     if(list_of_possible_guess[i].indexOf(letter_corrects[j]) === -1){
+            //       good = false;
+            //       break;
+            //     }
+            //   }
+            //   for(var j = 0; j < list_of_incorrect_guess.length; j++){
+            //     if(list_of_possible_guess[i].indexOf(list_of_incorrect_guess[j]) === 1){
+            //       good = false;
+            //       break;
+            //     }
+            //   }
+            //   if(good){
+            //     denominator += 1.0;
+            //   }
+            // }
+            // console.log(list_of_incorrect_guess);
+            // console.log(denominator);
+
+            // denominator = denominator / list_of_possible_guess.length;
+            // console.log("denominator");
+            // console.log(denominator);
+            // console.log(list_of_possible_guess.length);
+            // var new_frequency = [];
+            // var prob;
+            // for(var k = 0; k < 26; k++){
+            //   prob = 0.0;
+            //   for(var i = 0; i < list_of_possible_guess.length; i++){
+            //     good = true;
+            //     for(var j = 0; j < letter_corrects.length; j++){
+            //       if(list_of_possible_guess[i].indexOf(letter_corrects[j]) === -1){
+            //         good = false;
+            //         break;
+            //       }
+            //     }
+            //     if(good){
+            //       for(var j = 0; j < letter_corrects.length; j++){
+            //         if(list_of_possible_guess[i].indexOf(String.fromCharCode(65 + k)) != -1){
+            //           prob += 1/denominator;
+            //         }
+            //       }
+            //     }
+            //   }
+            //   new_frequency[k] = prob;
+            // }
+            // console.log("new frequency");
+            // console.log(new_frequency);
+
             char_frequency = [];
             for (var i = 0; i < 26; i++){
               char_frequency[i] = 0;
@@ -495,12 +602,12 @@
                }
             }
             pie_chart_data = [];
-            console.log("entered");
+            //console.log("entered");
 
             console.log(letter_corrects)
             for(var i = 0; i < 26; i++){
               if(letter_corrects.indexOf(String.fromCharCode(65 + i)) === -1){
-                pie_chart_data.push(char_frequency[i]/total);
+                pie_chart_data.push(char_frequency[i]/list_of_possible_guess.length);
 
               }
               else{
@@ -520,7 +627,7 @@
                   type: 'column'
                 },
                 title: {
-                  text: 'Letter Probability Distribution'
+                  text: 'Next Best Letter to Guess'
                 },
                 xAxis: {
                   categories: bar_char_y
