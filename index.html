@@ -55,8 +55,8 @@
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
       </form>
-      <!--
-      <ul class="nav navbar-nav navbar-right">
+      
+     <!--  <ul class="nav navbar-nav navbar-right">
         <li><a href="#">Link</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
@@ -68,7 +68,7 @@
             <li><a href="#">Separated link</a></li>
           </ul>
         </li>
-      </ul>-->
+      </ul> -->
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
@@ -76,18 +76,33 @@
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
       <!-- Include all compiled plugins (below), or include individual files as needed -->
       <script src="js/bootstrap.min.js"></script>
-      <div class="form-group has-success">
+      <!-- importing all the data set for different words length -->
+      <script src="data/5_words.js"></script>
+      <script src="data/6_words.js"></script>
+      <script src="data/7_words.js"></script>
+      <script src="data/8_words.js"></script>
+      <script src="data/9_words.js"></script>
+      <script src="data/10_words.js"></script>
+      
+      <!--<div class="form-group has-success">
         <label class="control-label" for="inputSuccess1">Give a Dictionary file</label>
         <input type="file" class="form_control" id="files" name="files[]" multiple />
         <p class="help-block">Dictionary file contains one word per line</p>
       </div>
-        <output id="list"></output>
-
-        <p id="fileContents"></p>
+        <output id="list"></output>-->
+        <div class="form-group has-success">
+        <label class="control-label" for="inputSuccess1">Pick a word length</label>
+        </div>
+        <!--<p id="fileContents"></p>-->
         <div class="row">
-          <button type="button" class="col-md-1 btn btn-primary" onclick="processVocab()">Process</button>
-          <div class="col-md-3"></div>
-          <button type="button" class="btn"><a href="common.txt" download>Download the dictionary file</a></button>
+          <!--<button type="button" class="col-md-1 btn btn-primary" onclick="processVocab()">Process</button>-->
+          <div class="col-md-1"></div>
+          <button type="button" class="btn btn-primary" onclick="setDict(5)">5 letter words</button>
+          <button type="button" class="btn btn-primary" onclick="setDict(6)">6 letter words</button>
+          <button type="button" class="btn btn-primary" onclick="setDict(7)">7 letter words</button>
+          <button type="button" class="btn btn-primary" onclick="setDict(8)">8 letter words</button>
+          <button type="button" class="btn btn-primary" onclick="setDict(9)">9 letter words</button>
+          <button type="button" class="btn btn-primary" onclick="setDict(10)">10 letter words</button>
         </div>
         <hr>
         <div class="row">
@@ -104,11 +119,13 @@
               <span class="caret"></span>
             </button>
             <ul id="ul_length" class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-              <!--<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+              <!-- <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
               <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
               <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>-->
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li> -->
             </ul>
+          </div>
+          <div id="restart_game">
           </div>
        </div>
 
@@ -157,11 +174,26 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script src="http://code.highcharts.com/highcharts.js"></script>
         <script>
-         
-          var max_num_guesses = 7;
+          console.log(words_5);
+          console.log(words_5.length);
+          console.log(words_5_count.length);
+          console.log(words_6.length);
+          console.log(words_6_count.length);
+          console.log(words_7.length);
+          console.log(words_7_count.length);
+          console.log(words_8.length);
+          console.log(words_8_count.length);
+          console.log(words_9.length);
+          console.log(words_9_count.length);
+          console.log(words_10.length);
+          console.log(words_10_count.length);
+
+
+          var max_num_guesses = 10;
           var guess_counter = 0;
           //Global variable for keeping all the vocabs.
           var vocab = [];
+          var vocab_weight = [];
           var char_frequency = [];
           var word_length = 0;
           //Variable to store all the words that have the length and should be something to guessed
@@ -181,6 +213,40 @@
 
           var letter_corrects = [];
 
+
+          function setDict(num){
+            document.getElementById("ul_length").innerHTML = "";
+            if(num == 5){
+              vocab = words_5;
+              vocab_weight = words_5_count;
+              processVocab();
+            }
+            else if(num == 6){
+              vocab = words_6;
+              vocab_weight = words_6_count;
+              processVocab();
+            }
+            else if(num == 7){
+              vocab = words_7;
+              vocab_weight = words_7_count;
+              processVocab();
+            }
+            else if(num == 8){
+              vocab = words_8;
+              vocab_weight = words_8_count;
+              processVocab();
+            }
+            else if(num == 9){
+              vocab = words_9;
+              vocab_weight = words_9_count;
+              processVocab();
+            }
+            else if(num == 10){
+              vocab = words_10;
+              vocab_weight = words_10_count;
+              processVocab();
+            }
+          }
           function handleFileSelect(evt) {
             var files = evt.target.files; // FileList object
             // files is a FileList of File objects. List some properties.
@@ -200,7 +266,7 @@
             }
             document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
           }
-          document.getElementById('files').addEventListener('change', handleFileSelect, false);
+          //document.getElementById('files').addEventListener('change', handleFileSelect, false);
 
           function processVocab(){
             /*
@@ -238,7 +304,7 @@
               }
             }
           }
-          function gameover_win(){
+          function gameover_win(word){
             guess_pool = [];
             letter_corrects = [];
             correct_index = [];
@@ -247,9 +313,50 @@
             guessing_word = null;
             word_length = 0;
             //If file read in happened
-            document.getElementById("guessing").innerHTML = "Pick Word Length to Restart";
+            document.getElementById("guessing").innerHTML = "The correct word is " + word + "</br>";
+            document.getElementById("guessing").innerHTML += "Click on Word Length to Restart";
             //document.getElementById("progress").innerHTML = "";
             document.getElementById("probability").innerHTML = "";
+            pie_chart_data = [];
+
+              for(var i = 0; i < 26; i++){
+                pie_chart_data.push(char_frequency[i]/guess_pool.length);
+              }
+              bar_char_y = [];
+              for(var i = 0; i < 26; i++){
+                bar_char_y[i] = String.fromCharCode(65 + i);
+              }
+
+               $(function () { 
+                $('#container2').highcharts({
+                  chart: {
+                    type: 'column'
+                  },
+                  title: {
+                    text: 'Next Best Letter to Guess'
+                  },
+                  xAxis: {
+                    categories: bar_char_y
+                  },
+                  yAxis: {
+                    title: {
+                      text: 'Probability'
+                    }
+                  },
+                  plotOptions: {
+                    column: {
+                      pointPadding: 0,
+                      borderWidth: 1,
+                      groupPadding: 0,
+                      shadow: true
+                    }
+                  },
+                  series: [
+                    {
+                      data: pie_chart_data
+                    }]
+                  });
+              });
           }
           function gameover(){
             guess_pool = [];
@@ -266,7 +373,7 @@
           }
 
           function setVocabLength(selected_length){
-            document.getElementById("number_of_guesses").innerHTML = "You have " + (max_num_guesses - guess_counter) + " of guesses";
+            document.getElementById("number_of_guesses").innerHTML = "You have " + (max_num_guesses - guess_counter) + " guesses left";
             guess_pool = [];
             letter_corrects = [];
             word_length = selected_length;
@@ -281,7 +388,8 @@
               }
               var index = Math.floor((Math.random() * guess_pool.length));
 
-              guessing_word = guess_pool[index];
+              //guessing_word = guess_pool[index];
+              guessing_word = "WHEELER";
               console.log("the guess word pool is");
               console.log(guess_pool);
               console.log("the word is " + guessing_word);
@@ -361,13 +469,14 @@
            * letter is being guessed.
            **/
           function guess(letter){
-
+            console.log("guessing " + letter + "\n\n\n");
             if(word_length == 0){
               alert("pick the word length");
+              return;
             }
             else{
-              guess_counter += 1;
-              document.getElementById("number_of_guesses").innerHTML = "You have " + (max_num_guesses - guess_counter) + " of guesses";
+              //guess_counter += 1;
+              document.getElementById("number_of_guesses").innerHTML = "You have " + (max_num_guesses - guess_counter) + " guesses left";
 
               document.getElementById("progress").innerHTML += "#" + guess_counter + " guess(es), guessing letter " + letter + "<br/>";
             }
@@ -409,10 +518,10 @@
               //If it's done then output DONE
               if(correct_index.length == guessing_word.length){
                 document.getElementById("progress").innerHTML += "DONE! The word is " + guessing_word + "<br/>";
-                gameover_win();
+                gameover_win(guessing_word);
                 return;
               }
-              else if(guess_counter == 7){
+              else if(guess_counter == max_num_guesses){
                 document.getElementById("progress").innerHTML += "GAME OVER!" + "<br/>";
                 gameover();
                 return;
@@ -423,10 +532,11 @@
             }
             //Wrong guess
             else{
+              guess_counter += 1;
               console.log("wrong");
               list_of_incorrect_guess.push(letter);
               list_of_incorrect_guess.filter(onlyUnique);
-              if(guess_counter == 7){
+              if(guess_counter == max_num_guesses){
                 document.getElementById("progress").innerHTML += "GAME OVER!" + "<br/>";
                 gameover();
                 return;
@@ -453,7 +563,8 @@
                 good = true;
               }
               //If the vocab satisfy our correct index result
-              if(good){
+              if(good)
+              {
                 //We do a second check here to see if the wrong guessed letter have appear in such word
                 if(list_of_incorrect_guess.length == 0){
                   var never_appear = true;
@@ -489,10 +600,9 @@
                       }
                     }
                   }
-                  //console.log("pushing" + current_word);
-                  //console.log("list size" + list_of_possible_guess.length);
                 }
                 else{
+                  console.log("entered else");
                   var never_appear = true;
                   for(var k = 0; k < list_of_incorrect_guess.length; k++){
                     if(current_word.indexOf(list_of_incorrect_guess[k]) === -1){ 
@@ -506,15 +616,40 @@
                     //Check it doesn't contain duplicates
                     if(list_of_possible_guess.indexOf(current_word) === -1){
                       var have_correct_number_of_letter = true;
+                      // //Third check, having the same amount of correct guessed letter
+                      // for(var l = 0; l < list_of_correct_guess.length; l++){
+                      //   console.log("hello" + current_word.split(new RegExp(list_of_correct_guess[l].letter, "gi").length-1));
+                      //   if(current_word.split(new RegExp(list_of_correct_guess[l].letter, "gi").length-1) != list_of_correct_guess[l].length){
+                      //     have_correct_number_of_letter = false;
+                      //     break;
+                      //   }
+                      // }
                       //Third check, having the same amount of correct guessed letter
-                      for(var l = 0; l < list_of_correct_guess.length; l++){
-                        console.log("hello" + current_word.split(new RegExp(list_of_correct_guess[l].letter, "gi").length-1));
-                        if(current_word.split(new RegExp(list_of_correct_guess[l].letter, "gi").length-1) != list_of_correct_guess[l].length){
+                      for(var l = 0; l < letter_corrects.length; l++){
+                        var current_total = 0;//keep track how many times the letter occur
+                        var correct_total = 0;
+                        for(var q = 0; q < current_word.length; q++){
+                          if(current_word.charAt(q) == letter_corrects[l]){
+                            current_total += 1;
+                          }
+                        }
+                        for(var q = 0; q < guessing_word.length; q++){
+                          if(guessing_word.charAt(q) == letter_corrects[l]){
+                            correct_total += 1;
+                          }
+                        }
+                        console.log("current_total: " + current_total);
+                        console.log("correct_total: " + correct_total);
+                        if(current_total != correct_total){
                           have_correct_number_of_letter = false;
+                          console.log("not pushing " + current_word);
                           break;
                         }
                       }
+
+
                       if(have_correct_number_of_letter){
+                        console.log("pushing " + current_word);
                         list_of_possible_guess.push(current_word);
                       }
                     }
@@ -592,9 +727,12 @@
             for (var i = 0; i < 26; i++){
               char_frequency[i] = 0;
             }
+            //console.log(find_unique_characters('baraban'));​
             total = 0.0
             for(var i = 0; i < list_of_possible_guess.length;i++){
               var word = list_of_possible_guess[i];
+              word = find_unique_characters(word);
+              console.log(word);
               for(var j = 0; j < word.length; j++){
                     char_frequency[word.charCodeAt(j)-65] += 1; 
                     total += 1.0
@@ -603,7 +741,6 @@
             }
             pie_chart_data = [];
             //console.log("entered");
-
             console.log(letter_corrects)
             for(var i = 0; i < 26; i++){
               if(letter_corrects.indexOf(String.fromCharCode(65 + i)) === -1){
@@ -651,107 +788,15 @@
                   }]
                 });
             });
-             /*
-            $(function () {
-              $(document).ready(function () {
-                // Build the chart
-                $('#container2').highcharts({
-                  chart: {
-                    plotBackgroundColor: null,
-                    plotBorderWidth: null,
-                    plotShadow: false
-                  },
-                  title: {
-                    text: 'Letter Probability Distribution'
-                  },
-                  tooltip: {
-                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-                  },
-                  plotOptions: {
-                    pie: {
-                      allowPointSelect: true,
-                      cursor: 'pointer',
-                      dataLabels: {
-                        enabled: false
-                        },
-                      showInLegend: true
-                    }
-                  },
-                  series: [{
-                    type: 'pie',
-                    name: 'next guess probability',
-                    data: pie_chart_data
-                  }]
-                });
-              });
-          });*/
-
-            $(function () {
-              $(document).ready(function () {
-                // Build the chart
-                $('#container').highcharts({
-                  chart: {
-                    plotBackgroundColor: null,
-                    plotBorderWidth: null,
-                    plotShadow: false
-                  },
-                  title: {
-                    text: 'Words Probability Distribution'
-                  },
-                  tooltip: {
-                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-                  },
-                  plotOptions: {
-                    pie: {
-                      allowPointSelect: true,
-                      cursor: 'pointer',
-                      dataLabels: {
-                        enabled: false
-                        },
-                      showInLegend: true
-                    }
-                  },
-                  series: [{
-                    type: 'pie',
-                    name: 'next guess probability',
-                    data: list_of_prob
-                  }]
-                });
-              });
-          });
-
-            /*
-            $(function () { 
-              $('#container').highcharts({
-                chart: {
-                  type: 'column'
-                },
-                title: {
-                  text: 'Probability Distribution'
-                },
-                xAxis: {
-                  categories: list_of_possible_guess
-                },
-                yAxis: {
-                  title: {
-                    text: 'Probability'
+          }
+          function find_unique_characters( string ){
+              var unique='';
+              for(var i=0; i<string.length; i++){
+                  if(unique.indexOf(string[i])==-1){
+                      unique += string[i];
                   }
-                },
-                plotOptions: {
-                  column: {
-                    pointPadding: 0,
-                    borderWidth: 1,
-                    groupPadding: 0,
-                    shadow: true
-                  }
-                },
-                series: [
-                  {
-                    data: list_of_prob
-                  }]
-                });
-            });
-            */
+              }
+              return unique;
           }
           /**
            * Given a string and its find, return all indexs of its occurences
